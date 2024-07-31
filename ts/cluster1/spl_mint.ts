@@ -41,6 +41,7 @@ const mint = new PublicKey("5N8rqmmhP8bwLWpHpCqc1BRHdWCwHgjKEzAhgke5UR6K");
       /*
         Your ata is: CBP2JETg7E2mbg17b4bW34ohm3jXsHPP3psNeux93Q4k
         Your mint txid: 5t9ATaWSw8gnR6BFFNoCM5ZjxHay2JrN9FNjRea6CfkXrQRGwkpu69YhaDVgjqitGMLhwbQS5yTXNi1V4y8GjxNr
+        //devnet explorer: https://explorer.solana.com/tx/5t9ATaWSw8gnR6BFFNoCM5ZjxHay2JrN9FNjRea6CfkXrQRGwkpu69YhaDVgjqitGMLhwbQS5yTXNi1V4y8GjxNr?cluster=devnet
     */
     }
   } catch (error) {
