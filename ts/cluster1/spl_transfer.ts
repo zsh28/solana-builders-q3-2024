@@ -17,14 +17,14 @@ const to = new PublicKey("BApYKNe2yv6u8Wk8uwJwMTPuy5Jw8eQEc2wVYn5gqfFP");
 
 (async () => {
     try {
-        // Get the token account of the fromWallet address, and if it does not exist, create it
+        // (ata) Get the token account of the fromWallet address, and if it does not exist, create it
         const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
             connection,
             keypair,
             mint,
             keypair.publicKey
         );
-        // Get the token account of the toWallet address, and if it does not exist, create it
+        // (ata) Get the token account of the toWallet address, and if it does not exist, create it
         const toTokenAccount = await getOrCreateAssociatedTokenAccount(
             connection,
             keypair,
