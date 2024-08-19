@@ -8,7 +8,10 @@ This repository showcases work done for the WBA Turbine 2024 Q3 Cohort.
 - [30/07/2024 - Class 1](#30072024---class-1)
 - [31/07/2024 - Class 2](#31072024---class-2)
 - [01/08/2024 - Class 3](#01082024---class-3)
-
+- [06/08/2024 - Class 4](#06082024---class-4)
+- [07/08/2024 - Class 5](#07082024---class-5)
+- [08/08/2024 - Class 6](#08082024---class-6)
+- [13/08/2024 - 15/08/2024 - Classes 7 - 9](#13082024---15082024---classes-7---9)
 ---
 
 ## 30/07/2024 - Class 1
@@ -28,74 +31,6 @@ In Class 1, we covered the process of creating and managing tokens on the Solana
 
     ts\cluster1\spl_init.ts
     ts\cluster1\spl_mint.ts
-
-### Code Snippets
-
-**File: `spl_init.ts`**
-
-```typescript
-import { Keypair, Connection, Commitment } from "@solana/web3.js";
-import { createMint } from "@solana/spl-token";
-import wallet from "../wba-wallet.json";
-
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
-const commitment: Commitment = "confirmed";
-const connection = new Connection("https://api.devnet.solana.com", commitment);
-
-(async () => {
-  try {
-    const mint = await createMint(
-      connection,
-      keypair,
-      keypair.publicKey,
-      null,
-      6
-    );
-    console.log(`Successfully created mint: ${mint}`);
-  } catch (error) {
-    console.log(`Oops, something went wrong: ${error}`);
-  }
-})();
-```
-
-**File: `spl_mint.ts`**
-
-```typescript
-import { Keypair, PublicKey, Connection, Commitment } from "@solana/web3.js";
-import { getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
-import wallet from "../wba-wallet.json";
-
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
-const commitment: Commitment = "confirmed";
-const connection = new Connection("https://api.devnet.solana.com", commitment);
-
-const token_decimals = 1_000_000n;
-const mint = new PublicKey("5N8rqmmhP8bwLWpHpCqc1BRHdWCwHgjKEzAhgke5UR6K");
-
-(async () => {
-  try {
-    const ata = await getOrCreateAssociatedTokenAccount(
-      connection,
-      keypair,
-      mint,
-      keypair.publicKey
-    );
-    console.log(`Your ATA is: ${ata.address.toBase58()}`);
-
-    const mintTx = await mintTo(
-      connection,
-      keypair,
-      mint,
-      ata.address,
-      keypair.publicKey,
-      BigInt(100) * token_decimals
-    );
-    console.log(`Your mint txid: ${mintTx}`);
-  } catch (error) {
-    console.log(`Oops, something went wrong: ${error}`);
-  }
-})();
-```
 
 You can view the transaction details for the mint operation [here](https://explorer.solana.com/tx/5t9ATaWSw8gnR6BFFNoCM5ZjxHay2JrN9FNjRea6CfkXrQRGwkpu69YhaDVgjqitGMLhwbQS5yTXNi1V4y8GjxNr?cluster=devnet).
 
@@ -120,125 +55,9 @@ In Class 2, we expanded our understanding of the Solana blockchain by adding met
 
     ts\cluster1\spl_metadata.ts
     ts\cluster1\spl_transfer.ts
-
-### Code Snippets
-
-**File: `spl_metadata.ts`**
-
-```typescript
-import wallet from "../wba-wallet.json";
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { 
-    createMetadataAccountV3, 
-    CreateMetadataAccountV3InstructionAccounts, 
-    CreateMetadataAccountV3InstructionArgs,
-    DataV2Args
-} from "@metaplex-foundation/mpl-token-metadata";
-import { createSignerFromKeypair, signerIdentity, publicKey } from "@metaplex-foundation/umi";
-import bs58 from "bs58";
-
-// Define the Mint address
-const mint = publicKey("5N8rqmmhP8bwLWpHpCqc1BRHdWCwHgjKEzAhgke5UR6K");
-
-// Create a UMI connection
-const umi = createUmi('https://api.devnet.solana.com');
-const keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
-const signer = createSignerFromKeypair(umi, keypair);
-umi.use(signerIdentity(createSignerFromKeypair(umi, keypair)));
-
-(async () => {
-    try {
-        let accounts: CreateMetadataAccountV3InstructionAccounts = {
-            mint,
-            mintAuthority: signer
-        }
-
-        let data: DataV2Args = {
-            name: "My NFT",
-            symbol: "NFT",
-            uri: "", // Empty URI for now
-            sellerFeeBasisPoints: 0,
-            creators: null,
-            collection: null,
-            uses: null,
-        }
-
-        let args: CreateMetadataAccountV3InstructionArgs = {
-            data: data,
-            isMutable: true,
-            collectionDetails: null,
-        }
-
-        let tx = createMetadataAccountV3(
-            umi,
-            {
-                ...accounts,
-                ...args
-            }
-        );
-
-        let result = await tx.sendAndConfirm(umi);
-        console.log(bs58.encode(result.signature));
-        
-    } catch(e) {
-        console.error(`Oops, something went wrong: ${e}`);
-    }
-})();
-```
-
-**File: `spl_transfer.ts`**
-
-```typescript
-import { Commitment, Connection, Keypair, PublicKey } from "@solana/web3.js";
-import wallet from "../wba-wallet.json";
-import { getOrCreateAssociatedTokenAccount, transfer } from "@solana/spl-token";
-
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
-const token_decimals = 1_000_000n;
-const commitment: Commitment = "confirmed";
-const connection = new Connection("https://api.devnet.solana.com", commitment);
-
-const mint = new PublicKey("5N8rqmmhP8bwLWpHpCqc1BRHdWCwHgjKEzAhgke5UR6K");
-const to = new PublicKey("BApYKNe2yv6u8Wk8uwJwMTPuy5Jw8eQEc2wVYn5gqfFP");
-
-(async () => {
-    try {
-        const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
-            connection,
-            keypair,
-            mint,
-            keypair.publicKey
-        );
-
-        const toTokenAccount = await getOrCreateAssociatedTokenAccount(
-            connection,
-            keypair,
-            mint,
-            to
-        );
-
-        const signature = await transfer(
-            connection,
-            keypair,
-            fromTokenAccount.address,
-            toTokenAccount.address,
-            keypair.publicKey,
-            1 * Number(token_decimals)
-        );
-        console.log(`Your transfer txid: ${signature}`);
-    } catch(e) {
-        console.error(`Oops, something went wrong: ${e}`);
-    }
-})();
-```
-
-These examples highlight how Umi simplifies Solana development by providing tools for easy account management, transaction handling, and program interaction. You can view the transaction details for the token transfer [here](https://explorer.solana.com/tx/2XACiGzRZUTLcdNsLJvuUGLansV4PfL7RkegkmbiPN8Jmqpg8wUtZ6aB5monnxbnPTrpm5NL5gkarDzw5dQNj9MR?cluster=devnet).
-
 ---
 
-## 
-
-01/08/2024 - Class 3
+## 01/08/2024 - Class 3
 
 In Class 3, we delved into the process of creating and minting NFTs (Non-Fungible Tokens) on the Solana blockchain using the Metaplex framework and Umi library.
 
@@ -259,144 +78,6 @@ In Class 3, we delved into the process of creating and minting NFTs (Non-Fungibl
     ts\cluster3\nft_metadata.ts
     ts\cluster3\nft_mint.ts
 
-### Code Snippets
-
-**File: `nft_image.ts`**
-
-```typescript
-import wallet from "../wba-wallet.json";
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { createGenericFile, createSignerFromKeypair, signerIdentity } from "@metaplex-foundation/umi";
-import { irysUploader } from "@metaplex-foundation/umi-uploader-irys";
-import { readFile } from "fs/promises";
-
-// Create a devnet connection
-const umi = createUmi('https://api.devnet.solana.com');
-
-let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
-const signer = createSignerFromKeypair(umi, keypair);
-
-umi.use(irysUploader());
-umi.use(signerIdentity(signer));
-
-(async () => {
-    try {
-        // Load image
-        const imageBuffer = await readFile("../ts/assets/generug.png");
-
-        // Convert image to generic file
-        const umiImageFile = createGenericFile(imageBuffer, "generug.png", {
-            tags: [{ name: "Content-Type", value: "image/png" }],
-          });
-
-        // Upload image
-        const [myUri] = await umi.uploader.upload([umiImageFile]);
-
-        console.log("Your image URI: ", myUri);
-        //Your image URI:  https://arweave.net/cnuUynn5tQ0lsn_Mdf73kYl8sbh_E56VgJuE9D__3XY
-    } catch (error) {
-        console.log("Oops.. Something went wrong", error);
-    }
-})();
-```
-
-**File: `nft_metadata.ts`**
-
-```typescript
-import wallet from "../wba-wallet.json"
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
-import { createGenericFile, createSignerFromKeypair, signerIdentity } from "@metaplex-foundation/umi"
-import { irysUploader } from "@metaplex-foundation/umi-uploader-irys"
-
-// Create a devnet connection
-const umi = createUmi('https://api.devnet.solana.com');
-
-let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
-const signer = createSignerFromKeypair(umi, keypair);
-
-umi.use(irysUploader());
-umi.use(signerIdentity(signer));
-
-(async () => {
-    try {
-        // Follow this JSON structure
-        // https://docs.metaplex.com/programs/token-metadata/changelog/v1.0#json-structure
-
-        const image = "https://arweave.net/cnuUynn5tQ0lsn_Mdf73kYl8sbh_E56VgJuE9D__3XY";
-     const metadata = {
-             name: "zsh28",
-             symbol: "zsh",
-             description: "zsh28 nft for wba cohort q3",
-             image: image,
-             attributes: [
-                {trait_type: 'trait', value: 'value'},
-                {trait_type: 'trait', value: 'value'},
-                {trait_type: 'trait', value: 'value'},
-            ],
-             properties: {
-                 files: [
-                    {
-                         type: "image/png",
-                         uri: image,
-                     },
-                 ]
-        },
-        creators: [
-            {
-                address: keypair.publicKey,
-                share: 100
-            }
-        ]
-         };
-         const myUri = await umi.uploader.uploadJson(metadata);
-         console.log("Your json URI: ", myUri);
-         //Your json URI:  https://arweave.net/pH69ELMW2S7bGfhJC09dUMkfHYSZFRqILC8rWurOSzw
-    }
-    catch(error) {
-        console.log("Oops.. Something went wrong", error);
-    }
-})();
-```
-
-**File: `nft_mint.ts`**
-
-```typescript
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
-import { createSignerFromKeypair, signerIdentity, generateSigner, percentAmount } from "@metaplex-foundation/umi"
-import { createNft, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
-
-import wallet from "../wba-wallet.json"
-import base58 from "bs58";
-
-const RPC_ENDPOINT = "https://api.devnet.solana.com";
-const umi = createUmi(RPC_ENDPOINT);
-
-let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
-const myKeypairSigner = createSignerFromKeypair(umi, keypair);
-umi.use(signerIdentity(myKeypairSigner));
-umi.use(mplTokenMetadata())
-
-const mint = generateSigner(umi);
-
-(async () => {
-    let tx = await createNft(
-        umi,
-        {
-            mint: generateSigner(umi),
-            name: "zsh28 NFT",
-            symbol: "zsh",
-            uri: "https://arweave.net/pH69ELMW2S7bGfhJC09dUMkfHYSZFRqILC8rWurOSzw",
-            sellerFeeBasisPoints: percentAmount(0, 2),
-        }
-    )
-    let result = await tx.sendAndConfirm(umi);
-    const signature = base58.encode(result.signature);
-    
-    console.log(`Succesfully Minted! Check out your TX here:\nhttps://explorer.solana.com/tx/${signature}?cluster=devnet`)
-
-    console.log("Mint Address: ", mint.publicKey);
-})();
-```
 ### Class 3 Additional Information
 
 **Transaction Details:** [View Transaction](https://explorer.solana.com/tx/27m1CxDMSJ8JTAkyXR9eQ6HMz66gyNkZUEyziGQ2A4b6uGdPNr9WJ16yT7TQJDWpsvNZwXWFYoEz86bjs3qUVpJ3?cluster=devnet)
@@ -406,3 +87,70 @@ const mint = generateSigner(umi);
 **NFT Details:** [View NFT on Solana Explorer](https://explorer.solana.com/address/BH4xprfV6pf6R64HQ1fNqW2DvebL8gCtV2Sb2QDdBf5X/instructions?cluster=devnet)
 
 ---
+
+## 06/08/2024 - Class 4
+
+In Class 4, we explored the implementation of a simple vault using Anchor, a framework for Solana smart contracts. The vault allows users to deposit and withdraw SOL, with additional functionality to close the vault and transfer the remaining balance back to the user.
+
+### Key Concepts Covered
+
+1. **Anchor Vault Program**:
+   - We developed a vault program using Anchor. The program includes functionality to initialize the vault, deposit SOL into it, withdraw SOL from it, and close the vault, returning all remaining funds to the user.
+
+2. **Understanding Context and Accounts**:
+   - The Anchor framework simplifies the process of managing accounts and interactions within Solana programs by using Rust macros and decorators. This class focused on how to structure the context and account data for managing vault operations.
+
+3. **Program Structure and Functions**:
+   - The vault program consists of several core functions: `initialize`, `deposit`, `withdraw`, and `close`. Each function interacts with the vault state and system program to manage funds securely.
+
+### Source Files/code 
+- This can be found in /anchor-vault 
+
+---
+
+## 07/08/2024 - Class 5
+
+In Class 5, we explored the implementation of an escrow program on Solana using Anchor, a framework for building secure and maintainable smart contracts. The class provided a detailed walkthrough of setting up and managing an escrow service where assets are held in trust until specific conditions are met.
+
+### Key Concepts Covered
+
+1. **Anchor-Escrow Program Overview**:
+   - The session focused on developing an escrow program where a depositor can lock funds, and a recipient can claim them once predetermined conditions are satisfied. This concept is crucial for scenarios like trustless transactions or conditional payments.
+
+2. **Escrow Initialization**:
+   - We initialized the escrow account, specifying the conditions under which the locked assets can be released. This involved creating and configuring the necessary program accounts and setting up the terms of the escrow.
+
+3. **Depositing and Releasing Funds**:
+   - The class demonstrated how to deposit funds into the escrow and how those funds are released when the conditions are met. We also discussed how to handle the scenarios where the escrow might need to be canceled or funds returned to the depositor.
+
+4. **Security and Validation**:
+   - Ensuring the security of the escrow process was a significant part of the session. We covered how to validate the escrow conditions on-chain, protecting the interests of both the depositor and recipient.
+
+---
+
+## 08/08/2024 - Class 6
+
+In Class 6, we focused on the development of an Automated Market Maker (AMM) on Solana using the Anchor framework. An AMM is a decentralized exchange protocol that facilitates token swapping by utilizing liquidity pools and a mathematical formula to determine prices.
+
+### Key Features
+
+1. **Liquidity Pool Management**:
+   - The AMM maintains liquidity pools where users can deposit pairs of tokens. These pools are essential for enabling decentralized trading. Liquidity providers earn fees from trades made within the pool, incentivizing them to contribute liquidity.
+
+2. **Constant Product Formula (x * y = k)**:
+   - The AMM uses the constant product formula, \(x \times y = k\), to maintain the balance between the two assets in the pool. This formula ensures that the product of the quantities of the two assets remains constant, automatically adjusting the price based on the available liquidity.
+
+3. **Slippage Protection and Fee Mechanism**:
+   - The AMM implements slippage protection to prevent significant price changes during large trades. A fee mechanism is also in place, which charges a small percentage on each trade, with the fees being distributed to liquidity providers. This helps stabilize the pool and protect traders from excessive slippage.
+
+### 13/08/2024 - 15/08/2024 - Classes 7 - 9
+
+During Classes 7 through 9, we concentrated on two primary areas: implementing NFT staking and crafting user stories for the capstone project.
+
+### Key Concepts Covered
+
+1. **NFT Staking**:
+   - We implemented a program that allows users to stake their NFTs and earn rewards. The staking mechanism, built on Solana using the Anchor framework, includes key features such as NFT deposit and withdrawal, reward distribution based on staking duration, and support for multiple NFT collections. This program is designed to incentivize users to hold and engage with their NFTs by providing additional utility and rewards.
+
+2. **Developing User Stories for the Capstone Project**:
+   - Role played user stories to derive them in a better way finally.
