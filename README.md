@@ -143,6 +143,8 @@ In Class 6, we focused on the development of an Automated Market Maker (AMM) on 
 3. **Slippage Protection and Fee Mechanism**:
    - The AMM implements slippage protection to prevent significant price changes during large trades. A fee mechanism is also in place, which charges a small percentage on each trade, with the fees being distributed to liquidity providers. This helps stabilize the pool and protect traders from excessive slippage.
 
+---
+
 ### 13/08/2024 - 15/08/2024 - Classes 7 - 9
 
 During Classes 7 through 9, we concentrated on two primary areas: implementing NFT staking and crafting user stories for the capstone project.
@@ -155,8 +157,10 @@ During Classes 7 through 9, we concentrated on two primary areas: implementing N
 2. **Developing User Stories for the Capstone Project**:
    - Role played user stories to derive them in a better way finally.
 
+---
+
 ### 20/08/2024 - Class 10
-- The Class 10 NFT Marketplace is a decentralized platform that allows users to list, delist, buy NFTS
+   - The Class 10 NFT Marketplace is a decentralized platform that allows users to list, delist, buy NFTS
 
 ### Key Concepts Covered
    1. Listing and Delisting NFTs: Users can list their NFTs for sale on the marketplace and delist them if they choose to remove them from sale.
