@@ -154,3 +154,10 @@ During Classes 7 through 9, we concentrated on two primary areas: implementing N
 
 2. **Developing User Stories for the Capstone Project**:
    - Role played user stories to derive them in a better way finally.
+
+### 20/08/2024 - Class 10
+- The Class 10 NFT Marketplace is a decentralized platform that allows users to list, delist, buy NFTS
+
+### Key Concepts Covered
+   1. Listing and Delisting NFTs: Users can list their NFTs for sale on the marketplace and delist them if they choose to remove them from sale.
+   2. Buying NFTs: Buyers can purchase NFTs listed on the marketplace, with the platform handling the transfer of ownership and payment processing.
