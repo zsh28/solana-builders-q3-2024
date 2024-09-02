@@ -165,3 +165,6 @@ During Classes 7 through 9, we concentrated on two primary areas: implementing N
 ### Key Concepts Covered
    1. Listing and Delisting NFTs: Users can list their NFTs for sale on the marketplace and delist them if they choose to remove them from sale.
    2. Buying NFTs: Buyers can purchase NFTs listed on the marketplace, with the platform handling the transfer of ownership and payment processing.
+
+### 21/08/2024 - Class 11
+   - In this class we covered a dice game that had randomness it will help in prediction markets 
