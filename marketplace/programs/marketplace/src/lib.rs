@@ -9,13 +9,13 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("2j8mbNmbxsrMSVLUWVc6zXDHxVVvEoUitAnTYqSvpPJb");
+declare_id!("CQyKqxgrrjnzYJwWdjkhQrQRhCCu6V1XJpZbuPifJnwR");
 
 #[program]
 pub mod marketplace {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, fee: u16, name: String) -> Result<()> {
-        ctx.accounts.init(name, fee, &ctx.bumps)
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+        initialize::handler(ctx)
     }
 }
