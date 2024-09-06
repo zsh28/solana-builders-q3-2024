@@ -8,4 +8,20 @@ pub enum CustomError {
     InvalidOutcome,
     #[msg("Event not resolved yet")]
     EventNotResolved,
+    #[msg("Betting closed")]
+    BettingClosed,
+    #[msg("Already claimed")]
+    AlreadyClaimed,
+    #[msg("Event not started")]
+    EventNotStarted,
+    #[msg("Invalid bet amount")]
+    InvalidBetAmount,
+    #[msg("Invalid event ID")]
+    InvalidEvent,
+    #[msg("Insufficient vault funds")]
+    InsufficientVaultFunds,
+    #[msg("Reward calculation failed")]
+    RewardCalculationFailed,
+    #[msg("Bet lost")]
+    BetLost,
 }

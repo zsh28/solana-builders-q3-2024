@@ -8,9 +8,5 @@ describe("sports-hub", () => {
 
   const program = anchor.workspace.SportsHub as Program<SportsHub>;
 
-  it("Is initialized!", async () => {
-    // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
-  });
+  //
 });

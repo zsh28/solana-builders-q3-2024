@@ -9,14 +9,18 @@ pub struct PlaceBet<'info> {
     #[account(mut)]
     pub vault: SystemAccount<'info>,
     #[account(mut)]
-    pub event: Account<'info, Event>,
+    pub event: Account<'info, Event>, // No has_one constraint
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> PlaceBet<'info> {
     pub fn place_bet(&mut self, event_id: u64, outcome: u8, amount: u64) -> Result<()> {
+        // Ensure the event ID matches
+        require!(self.event.event_id == event_id, CustomError::InvalidEvent);
         require!(!self.event.resolved, CustomError::EventAlreadyResolved);
+        require!(Clock::get()?.unix_timestamp < self.event.start_time, CustomError::BettingClosed);
         require!(outcome == 0 || outcome == 1, CustomError::InvalidOutcome);
+        require!(amount > 0, CustomError::InvalidBetAmount);
 
         // Add the bet amount to the respective outcome pool
         if outcome == 0 {
