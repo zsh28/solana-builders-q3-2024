@@ -27,12 +27,8 @@ impl<'info> DistributeRewards<'info> {
         require!(self.event.event_id == event_id, CustomError::InvalidEvent);
 
         // Check if the player won the bet
-        let player_bet_outcome = if self.event.winning_outcome.unwrap() == 0 {
-            self.bet.amount == self.event.outcome_a_bets
-        } else {
-            self.bet.amount == self.event.outcome_b_bets
-        };
-
+        let player_bet_outcome = self.bet.outcome == self.event.winning_outcome.unwrap();
+        
         // Ensure the player's bet was on the winning outcome
         require!(player_bet_outcome, CustomError::BetLost);
 
