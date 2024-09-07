@@ -19,7 +19,14 @@ pub mod sports_hub {
         ctx.accounts.init(amount)
     }
 
-    pub fn initialize_event(ctx: Context<InitializeEvent>, event_id: u64, team_a: [u8; 32], team_b: [u8; 32], start_time: i64) -> Result<()> {
+    pub fn initialize_event(
+        ctx: Context<InitializeEvent>, 
+        event_id: u64, 
+        team_a: [u8; 32], 
+        team_b: [u8; 32], 
+        start_time: i64
+    ) -> Result<()> {
+        // Initialize the event data
         let event = &mut ctx.accounts.event;
         event.event_id = event_id;
         event.team_a = team_a;
