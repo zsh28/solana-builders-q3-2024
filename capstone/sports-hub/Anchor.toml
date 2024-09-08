@@ -11,8 +11,13 @@ sports_hub = "GNB8U3zWyQUXGLjYCPHdrvq3r62g8cW67MLNGSsyLChS"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test.validator]
+url = "https://api.localnet.solana.com"
+[test]
+startup_wait = 20000

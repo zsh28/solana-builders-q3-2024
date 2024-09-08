@@ -24,4 +24,6 @@ pub enum CustomError {
     RewardCalculationFailed,
     #[msg("Bet lost")]
     BetLost,
+    #[msg("Bet overflow")]
+    BetOverflow,
 }

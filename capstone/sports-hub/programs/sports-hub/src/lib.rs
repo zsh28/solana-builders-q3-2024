@@ -18,11 +18,12 @@ pub mod sports_hub {
     pub fn initialize(ctx: Context<Initialize>, amount: u64) -> Result<()> {
         ctx.accounts.init(amount)
     }
+
     pub fn create_event(
         ctx: Context<InitializeEvent>, 
         event_id: u64, 
-        team_a: [u8; 32], 
-        team_b: [u8; 32], 
+        team_a: String, 
+        team_b: String, 
         start_time: i64
     ) -> Result<()> {
         let event = &mut ctx.accounts.event;
@@ -33,6 +34,7 @@ pub mod sports_hub {
         event.total_bets = 0;
         event.outcome_a_bets = 0;
         event.outcome_b_bets = 0;
+        event.draw_bets = 0; // Adding draw support
         event.resolved = false;
         event.winning_outcome = None;
         Ok(())
@@ -42,7 +44,7 @@ pub mod sports_hub {
         ctx.accounts.place_bet(event_id, outcome, amount)
     }
 
-    pub fn resolve_event(ctx: Context<ResolveEvent>, event_id: u64, winning_outcome: u8) -> Result<()> {
+    pub fn resolve_event(ctx: Context<ResolveEvent>, event_id: u64, winning_outcome: Option<u8>) -> Result<()> {
         ctx.accounts.resolve_event(event_id, winning_outcome)
     }
 
