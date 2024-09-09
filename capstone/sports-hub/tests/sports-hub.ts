@@ -4,27 +4,23 @@ import { SportsHub } from "../target/types/sports_hub";
 import { assert } from "chai";
 
 describe("sports-hub", () => {
-  // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.SportsHub as Program<SportsHub>;
 
-  // Generate random keypairs for players
   const player1 = web3.Keypair.generate();
   const player2 = web3.Keypair.generate();
   const house = provider.wallet;
 
   let vaultPda: web3.PublicKey;
   let vaultBump: number;
-
-  // Define a test event and bets
   const eventId = new BN(1);  // Event ID is simply a number (1 in this case)
   const teamA = "Team A";
   const teamB = "Team B";
-  let event: web3.Keypair;  // Store the event Keypair globally for reuse
+  let event: web3.Keypair;
 
   before(async () => {
-    // Airdrop some SOL to player1 and player2 for testing
+    // Airdrop SOL for player1 and player2
     await provider.connection.confirmTransaction(
       await provider.connection.requestAirdrop(player1.publicKey, web3.LAMPORTS_PER_SOL)
     );
@@ -32,7 +28,7 @@ describe("sports-hub", () => {
       await provider.connection.requestAirdrop(player2.publicKey, web3.LAMPORTS_PER_SOL)
     );
 
-    // Derive the PDA for the vault
+    // Derive the vault PDA
     [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("vault"), house.publicKey.toBuffer()],
       program.programId
@@ -47,7 +43,7 @@ describe("sports-hub", () => {
         vault: vaultPda,
         systemProgram: web3.SystemProgram.programId,
       })
-      .signers([])  // No additional signers since the house is the wallet
+      .signers([])
       .rpc();
 
     const vaultBalance = await provider.connection.getBalance(vaultPda);
@@ -55,12 +51,15 @@ describe("sports-hub", () => {
   });
 
   it("Creates a sports event", async () => {
-    event = web3.Keypair.generate();  // Generate new keypair for the event
+    event = web3.Keypair.generate();
 
-    const startTime = Math.floor(Date.now() / 1000) + 600; // Set the event start time to 10 minutes in the future
+    const durationInSeconds = 60;  // 1 minute from now
 
+    console.log("Setting event duration to 1 minute in the future.");
+
+    // Create the sports event (only pass the duration now)
     await program.methods
-      .createEvent(eventId, teamA, teamB, new BN(startTime))
+      .createEvent(teamA, teamB, new BN(durationInSeconds))
       .accounts({
         event: event.publicKey,
         payer: house.publicKey,
@@ -70,9 +69,10 @@ describe("sports-hub", () => {
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
+    console.log("Event start time in contract:", eventAccount.startTime.toNumber());
+
     assert.strictEqual(eventAccount.teamA, teamA, "Team A should be correct");
     assert.strictEqual(eventAccount.teamB, teamB, "Team B should be correct");
-    assert.strictEqual(eventAccount.startTime.toNumber(), startTime, "Start time should be correct");
   });
 
   it("Player 1 places a bet on Team A", async () => {
@@ -85,17 +85,20 @@ describe("sports-hub", () => {
       program.programId
     );
 
+    console.log("Bet PDA:", betPda.toString());
+    console.log("Player Stats PDA:", playerStatsPda.toString());
+
     await program.methods
       .placeBet(eventId, 0, new BN(web3.LAMPORTS_PER_SOL / 10)) // Bet 0.1 SOL on Team A
       .accounts({
         player: player1.publicKey,
         vault: vaultPda,
         event: event.publicKey,
-        bet: betPda,                 // PDA for bet
-        playerStats: playerStatsPda,  // PDA for playerStats
+        bet: betPda,
+        playerStats: playerStatsPda,
         systemProgram: web3.SystemProgram.programId,
       })
-      .signers([player1])  // Only player1 should sign
+      .signers([player1])
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
@@ -112,26 +115,51 @@ describe("sports-hub", () => {
       program.programId
     );
 
+    console.log("Bet PDA:", betPda.toString());
+    console.log("Player Stats PDA:", playerStatsPda.toString());
+
     await program.methods
       .placeBet(eventId, 1, new BN(web3.LAMPORTS_PER_SOL / 5)) // Bet 0.2 SOL on Team B
       .accounts({
         player: player2.publicKey,
         vault: vaultPda,
         event: event.publicKey,
-        bet: betPda,                 // PDA for bet
-        playerStats: playerStatsPda,  // PDA for playerStats
+        bet: betPda,
+        playerStats: playerStatsPda,
         systemProgram: web3.SystemProgram.programId,
       })
-      .signers([player2])  // Only player2 should sign
+      .signers([player2])
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
     assert.strictEqual(eventAccount.outcomeBBets.toString(), (web3.LAMPORTS_PER_SOL / 5).toString(), "Bet amount for Team B should be 0.2 SOL");
   });
 
+  it("Wait for event to start", async () => {
+    console.log("Waiting for the event to start...");
+
+    const waitTimeInMilliseconds = 60 * 1000; // 1 minute in milliseconds
+    const intervalInMilliseconds = 1000; // Countdown interval (1 second)
+
+    let remainingTime = waitTimeInMilliseconds / 1000; // Remaining time in seconds
+
+    const interval = setInterval(() => {
+        remainingTime -= 1;
+        console.log(`Time left: ${Math.floor(remainingTime / 60)} minutes ${remainingTime % 60} seconds`);
+    }, intervalInMilliseconds);
+
+    // Wait for the set time, and then clear the interval
+    await new Promise(resolve => setTimeout(() => {
+        clearInterval(interval);
+        resolve(true);
+    }, waitTimeInMilliseconds));
+
+    console.log("Event should now start.");
+  });
+
   it("Resolves the event with Team A winning", async () => {
     await program.methods
-      .resolveEvent(eventId, 0)  // Team A wins (outcome 0)
+      .resolveEvent(eventId, 0)  // Team A wins
       .accounts({
         admin: house.publicKey,
         event: event.publicKey,
@@ -161,11 +189,11 @@ describe("sports-hub", () => {
         player: player1.publicKey,
         vault: vaultPda,
         event: event.publicKey,
-        bet: betPda,                 // Use the same bet PDA from earlier
-        playerStats: playerStatsPda,  // Player stats account (PDA)
+        bet: betPda,
+        playerStats: playerStatsPda,
         systemProgram: web3.SystemProgram.programId,
       })
-      .signers([player1])  // Only player1 should sign
+      .signers([player1])
       .rpc();
 
     const balanceAfter = await provider.connection.getBalance(player1.publicKey);

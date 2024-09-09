@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-sports_hub = "GNB8U3zWyQUXGLjYCPHdrvq3r62g8cW67MLNGSsyLChS"
+sports_hub = "7zqecNY5KfdS8KCyNYBrtHya8SmxXyUta3hnLEvBCZxz"
 
 [registry]
 url = "https://api.apr.dev"
