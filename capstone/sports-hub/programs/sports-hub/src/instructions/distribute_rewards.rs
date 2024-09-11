@@ -15,6 +15,8 @@ pub struct DistributeRewards<'info> {
     #[account(mut)]
     pub player_stats: Account<'info, PlayerStats>, // Track player's winnings
     pub system_program: Program<'info, System>,
+    #[account(mut)]
+    pub house: Signer<'info>,
 }
 
 impl<'info> DistributeRewards<'info> {
@@ -81,7 +83,7 @@ impl<'info> DistributeRewards<'info> {
         // Transfer the reward from the vault to the player's account
         let seeds: [&[&[u8]]; 1] = [&[
             b"vault", 
-            self.player.to_account_info().key.as_ref(),
+            self.house.to_account_info().key.as_ref(),
              &[self.event.bump]
         ]]; 
         let transfer_ctx = CpiContext::new_with_signer(
