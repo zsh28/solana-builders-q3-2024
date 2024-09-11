@@ -4,20 +4,25 @@ use crate::errors::CustomError;
 
 #[derive(Accounts)]
 pub struct DistributeRewards<'info> {
+    #[account(
+        mut,
+        seeds = [b"vault", house.key().as_ref()],
+        bump = event.bump  // Ensure bump matches the one used during initialization
+    )]
+    pub vault: SystemAccount<'info>,  // Vault PDA
     #[account(mut)]
-    pub vault: SystemAccount<'info>, // Assume this is a PDA
+    pub event: Account<'info, Event>,  // Event account
     #[account(mut)]
-    pub event: Account<'info, Event>,
+    pub bet: Account<'info, Bet>,  // Bet account
     #[account(mut)]
-    pub bet: Account<'info, Bet>,
+    pub player: Signer<'info>,  // Player
     #[account(mut)]
-    pub player: Signer<'info>, // Signer account, no bump needed
-    #[account(mut)]
-    pub player_stats: Account<'info, PlayerStats>, // Track player's winnings
+    pub player_stats: Account<'info, PlayerStats>,  // Player stats
     pub system_program: Program<'info, System>,
-    #[account(mut)]
-    pub house: Signer<'info>,
+    /// CHECK: This is the house account used for PDA derivation
+    pub house: AccountInfo<'info>,  // House account needed to derive the vault PDA
 }
+
 
 impl<'info> DistributeRewards<'info> {
     pub fn claim_reward(&mut self, _event_id: u64) -> Result<()> {
@@ -30,16 +35,24 @@ impl<'info> DistributeRewards<'info> {
 
             // Ensure the vault has enough funds
             require!(
-                **self.vault.to_account_info().lamports.borrow() >= refund_amount,
+                self.vault.lamports() >= refund_amount,
                 CustomError::InsufficientVaultFunds
             );
 
-            let transfer_ctx = CpiContext::new(
+            let seeds = &[
+                b"vault",
+                self.house.key.as_ref(),
+                &[self.event.bump]
+            ];
+            let signer_seeds = &[&seeds[..]];
+
+            let transfer_ctx = CpiContext::new_with_signer(
                 self.system_program.to_account_info(),
                 Transfer {
                     from: self.vault.to_account_info(),
                     to: self.player.to_account_info(),
                 },
+                signer_seeds
             );
             transfer(transfer_ctx, refund_amount)?;
 
@@ -76,23 +89,25 @@ impl<'info> DistributeRewards<'info> {
 
         // Ensure the vault has sufficient funds for the reward
         require!(
-            **self.vault.to_account_info().lamports.borrow() >= player_reward,
+            self.vault.lamports() >= player_reward,
             CustomError::InsufficientVaultFunds
         );
 
         // Transfer the reward from the vault to the player's account
-        let seeds: [&[&[u8]]; 1] = [&[
-            b"vault", 
-            self.house.to_account_info().key.as_ref(),
-             &[self.event.bump]
-        ]]; 
+        let seeds = &[
+            b"vault",
+            self.house.key.as_ref(),
+            &[self.event.bump]
+        ];
+        let signer_seeds = &[&seeds[..]];
+
         let transfer_ctx = CpiContext::new_with_signer(
             self.system_program.to_account_info(),
             Transfer {
                 from: self.vault.to_account_info(),
                 to: self.player.to_account_info(),
             },
-            &seeds,
+            signer_seeds
         );
         transfer(transfer_ctx, player_reward)?;
 

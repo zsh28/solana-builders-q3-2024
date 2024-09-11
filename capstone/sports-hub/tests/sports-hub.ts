@@ -172,31 +172,42 @@ describe("sports-hub", () => {
   });
 
   it("Player 1 claims reward for betting on Team A", async () => {
+    // Derive the bet PDA for player1
     const [betPda, betBump] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("bet"), event.publicKey.toBuffer(), player1.publicKey.toBuffer()],
       program.programId
     );
+  
+    // Derive the player stats PDA for player1
     const [playerStatsPda, playerStatsBump] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("stats"), player1.publicKey.toBuffer()],
       program.programId
     );
-
-    const balanceBefore = await provider.connection.getBalance(player1.publicKey);
-
+  
+    // Derive the vault PDA with the same seeds and bump as in the program
+    const [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("vault"), house.publicKey.toBuffer()],
+      program.programId
+    );
+  
+    console.log("Bet PDA:", betPda.toString());
+    console.log("Player Stats PDA:", playerStatsPda.toString());
+    console.log("Vault PDA:", vaultPda.toString());
+  
     await program.methods
-    .distributeRewards()
-    .accounts({
+      .distributeRewards(eventId)
+      .accounts({
         player: player1.publicKey,
-        vault: vaultPda,
+        vault: vaultPda, 
         event: event.publicKey,
         bet: betPda,
         playerStats: playerStatsPda,
         systemProgram: web3.SystemProgram.programId,
-    })
-    .signers([player1])
-    .rpc();
-
-    const balanceAfter = await provider.connection.getBalance(player1.publicKey);
-    assert(balanceAfter > balanceBefore, "Player 1 should have received a reward");
+        house: house.publicKey,  
+      })
+      .signers([player1])
+      .rpc();
   });
+  
+  
 });

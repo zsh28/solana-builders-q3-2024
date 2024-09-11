@@ -138,7 +138,7 @@ pub mod sports_hub {
     }
     
 
-    pub fn distribute_rewards(ctx: Context<DistributeRewards>) -> Result<()> {
-        ctx.accounts.claim_reward(ctx.accounts.event.event_id)
+    pub fn distribute_rewards(ctx: Context<DistributeRewards>, event_id: u64) -> Result<()> {
+        ctx.accounts.claim_reward(event_id)
     }
 }
