@@ -40,8 +40,6 @@ describe("sports-hub", () => {
       .initialize(new BN(web3.LAMPORTS_PER_SOL / 2)) // Deposit 0.5 SOL
       .accounts({
         house: house.publicKey,
-        vault: vaultPda,
-        systemProgram: web3.SystemProgram.programId,
       })
       .signers([])
       .rpc();
@@ -63,7 +61,6 @@ describe("sports-hub", () => {
       .accounts({
         event: event.publicKey,
         payer: house.publicKey,
-        systemProgram: web3.SystemProgram.programId,
       })
       .signers([event])
       .rpc();
@@ -94,9 +91,6 @@ describe("sports-hub", () => {
         player: player1.publicKey,
         vault: vaultPda,
         event: event.publicKey,
-        bet: betPda,
-        playerStats: playerStatsPda,
-        systemProgram: web3.SystemProgram.programId,
       })
       .signers([player1])
       .rpc();
@@ -124,9 +118,6 @@ describe("sports-hub", () => {
         player: player2.publicKey,
         vault: vaultPda,
         event: event.publicKey,
-        bet: betPda,
-        playerStats: playerStatsPda,
-        systemProgram: web3.SystemProgram.programId,
       })
       .signers([player2])
       .rpc();
@@ -198,11 +189,9 @@ describe("sports-hub", () => {
       .distributeRewards(eventId)
       .accounts({
         player: player1.publicKey,
-        vault: vaultPda, 
         event: event.publicKey,
         bet: betPda,
         playerStats: playerStatsPda,
-        systemProgram: web3.SystemProgram.programId,
         house: house.publicKey,  
       })
       .signers([player1])
