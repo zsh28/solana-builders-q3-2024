@@ -26,4 +26,6 @@ pub enum CustomError {
     BetLost,
     #[msg("Bet overflow")]
     BetOverflow,
+    #[msg("Reward already claimed")]
+    RewardAlreadyClaimed,
 }

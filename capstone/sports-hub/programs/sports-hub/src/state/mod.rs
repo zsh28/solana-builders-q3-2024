@@ -12,6 +12,7 @@ pub struct Event {
     pub draw_bets: u64,    // New field for draw bets
     pub resolved: bool,
     pub winning_outcome: Option<u8>, // Optional value (1 byte for Some/None)
+    pub bump: u8,
 }
 
 impl Event {

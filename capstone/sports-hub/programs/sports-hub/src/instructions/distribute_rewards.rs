@@ -18,7 +18,7 @@ pub struct DistributeRewards<'info> {
 }
 
 impl<'info> DistributeRewards<'info> {
-    pub fn claim_reward(&mut self, _event_id: u64, vault_bump: u8) -> Result<()> {
+    pub fn claim_reward(&mut self, _event_id: u64) -> Result<()> {
         // Ensure the event has been resolved
         require!(self.event.resolved, CustomError::EventNotResolved);
 
@@ -82,7 +82,7 @@ impl<'info> DistributeRewards<'info> {
         let seeds: [&[&[u8]]; 1] = [&[
             b"vault", 
             self.player.to_account_info().key.as_ref(),
-             &[vault_bump]
+             &[self.event.bump]
         ]]; 
         let transfer_ctx = CpiContext::new_with_signer(
             self.system_program.to_account_info(),
