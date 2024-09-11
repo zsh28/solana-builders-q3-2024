@@ -5,20 +5,20 @@ use crate::errors::CustomError;
 #[derive(Accounts)]
 pub struct DistributeRewards<'info> {
     #[account(mut)]
-    pub vault: SystemAccount<'info>,
+    pub vault: SystemAccount<'info>, // Assume this is a PDA
     #[account(mut)]
     pub event: Account<'info, Event>,
     #[account(mut)]
     pub bet: Account<'info, Bet>,
     #[account(mut)]
-    pub player: Signer<'info>,
+    pub player: Signer<'info>, // Signer account, no bump needed
     #[account(mut)]
     pub player_stats: Account<'info, PlayerStats>, // Track player's winnings
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> DistributeRewards<'info> {
-    pub fn claim_reward(&mut self, _event_id: u64) -> Result<()> {
+    pub fn claim_reward(&mut self, _event_id: u64, vault_bump: u8) -> Result<()> {
         // Ensure the event has been resolved
         require!(self.event.resolved, CustomError::EventNotResolved);
 
@@ -26,6 +26,7 @@ impl<'info> DistributeRewards<'info> {
         if self.event.winning_outcome.is_none() {
             let refund_amount = self.bet.amount;
 
+            // Ensure the vault has enough funds
             require!(
                 **self.vault.to_account_info().lamports.borrow() >= refund_amount,
                 CustomError::InsufficientVaultFunds
@@ -69,8 +70,7 @@ impl<'info> DistributeRewards<'info> {
         let total_pool_after_fee = total_pool - platform_fee;
 
         // Calculate player's proportional reward
-        let player_reward = (self.bet.amount as u64 * total_pool_after_fee)
-            / total_winning_bets;
+        let player_reward = (self.bet.amount as u64 * total_pool_after_fee) / total_winning_bets;
 
         // Ensure the vault has sufficient funds for the reward
         require!(
@@ -79,12 +79,14 @@ impl<'info> DistributeRewards<'info> {
         );
 
         // Transfer the reward from the vault to the player's account
-        let transfer_ctx = CpiContext::new(
+        let seeds = &[&[b"vault", self.player.to_account_info().key.as_ref(), &[vault_bump]]]; 
+        let transfer_ctx = CpiContext::new_with_signer(
             self.system_program.to_account_info(),
             Transfer {
                 from: self.vault.to_account_info(),
                 to: self.player.to_account_info(),
             },
+            seeds,
         );
         transfer(transfer_ctx, player_reward)?;
 
