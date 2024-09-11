@@ -184,17 +184,17 @@ describe("sports-hub", () => {
     const balanceBefore = await provider.connection.getBalance(player1.publicKey);
 
     await program.methods
-      .distributeRewards()
-      .accounts({
+    .distributeRewards()
+    .accounts({
         player: player1.publicKey,
         vault: vaultPda,
         event: event.publicKey,
         bet: betPda,
         playerStats: playerStatsPda,
         systemProgram: web3.SystemProgram.programId,
-      })
-      .signers([player1])
-      .rpc();
+    })
+    .signers([player1])
+    .rpc();
 
     const balanceAfter = await provider.connection.getBalance(player1.publicKey);
     assert(balanceAfter > balanceBefore, "Player 1 should have received a reward");

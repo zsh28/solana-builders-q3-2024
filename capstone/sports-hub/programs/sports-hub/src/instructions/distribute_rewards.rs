@@ -79,14 +79,18 @@ impl<'info> DistributeRewards<'info> {
         );
 
         // Transfer the reward from the vault to the player's account
-        let seeds = &[&[b"vault", self.player.to_account_info().key.as_ref(), &[vault_bump]]]; 
+        let seeds: [&[&[u8]]; 1] = [&[
+            b"vault", 
+            self.player.to_account_info().key.as_ref(),
+             &[vault_bump]
+        ]]; 
         let transfer_ctx = CpiContext::new_with_signer(
             self.system_program.to_account_info(),
             Transfer {
                 from: self.vault.to_account_info(),
                 to: self.player.to_account_info(),
             },
-            seeds,
+            &seeds,
         );
         transfer(transfer_ctx, player_reward)?;
 
