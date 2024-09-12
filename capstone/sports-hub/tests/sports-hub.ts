@@ -27,15 +27,19 @@ describe("sports-hub", () => {
     await provider.connection.confirmTransaction(
       await provider.connection.requestAirdrop(player2.publicKey, web3.LAMPORTS_PER_SOL)
     );
-
-    // Derive the vault PDA
-    [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
+     // Derive the vault PDA
+     [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("vault"), house.publicKey.toBuffer()],
       program.programId
     );
+
+    console.log("Vault PDA:", vaultPda.toString());
   });
 
   it("Initializes the vault", async () => {
+    //console log vault pda
+    console.log("Vault PDA:", vaultPda.toString());
+    console.log("House", house.publicKey.toString());
     await program.methods
       .initialize(new BN(web3.LAMPORTS_PER_SOL / 2)) // Deposit 0.5 SOL
       .accounts({
@@ -129,7 +133,7 @@ describe("sports-hub", () => {
   it("Wait for event to start", async () => {
     console.log("Waiting for the event to start...");
 
-    const waitTimeInMilliseconds = 60 * 1000; // 1 minute in milliseconds
+    const waitTimeInMilliseconds = 2 * 1000; // 1 minute in milliseconds
     const intervalInMilliseconds = 1000; // Countdown interval (1 second)
 
     let remainingTime = waitTimeInMilliseconds / 1000; // Remaining time in seconds
@@ -175,15 +179,12 @@ describe("sports-hub", () => {
       program.programId
     );
   
-    // Derive the vault PDA with the same seeds and bump as in the program
-    const [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("vault"), house.publicKey.toBuffer()],
-      program.programId
-    );
-  
+
     console.log("Bet PDA:", betPda.toString());
     console.log("Player Stats PDA:", playerStatsPda.toString());
     console.log("Vault PDA:", vaultPda.toString());
+    //console log house 
+    console.log("House PDA:", house.publicKey.toString());
   
     await program.methods
       .distributeRewards(eventId)

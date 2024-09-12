@@ -7,7 +7,7 @@ pub struct DistributeRewards<'info> {
     #[account(
         mut,
         seeds = [b"vault", house.key().as_ref()],
-        bump = event.bump  // Ensure bump matches the one used during initialization
+        bump
     )]
     pub vault: SystemAccount<'info>,  // Vault PDA
     #[account(mut)]
@@ -25,7 +25,7 @@ pub struct DistributeRewards<'info> {
 
 
 impl<'info> DistributeRewards<'info> {
-    pub fn claim_reward(&mut self, _event_id: u64) -> Result<()> {
+    pub fn claim_reward(&mut self, _event_id: u64, bumps: DistributeRewardsBumps) -> Result<()> {
         // Ensure the event has been resolved
         require!(self.event.resolved, CustomError::EventNotResolved);
 
@@ -93,11 +93,13 @@ impl<'info> DistributeRewards<'info> {
             CustomError::InsufficientVaultFunds
         );
 
+        let bump_seed = bumps.vault;
+
         // Transfer the reward from the vault to the player's account
         let seeds = &[
             b"vault",
             self.house.key.as_ref(),
-            &[self.event.bump]
+            &[bump_seed]
         ];
         let signer_seeds = &[&seeds[..]];
 
