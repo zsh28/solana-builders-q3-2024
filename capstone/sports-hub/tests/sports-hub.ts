@@ -14,21 +14,29 @@ describe("sports-hub", () => {
 
   let vaultPda: web3.PublicKey;
   let vaultBump: number;
-  const eventId = new BN(1);  // Event ID is simply a number (1 in this case)
+  let event: web3.Keypair;
+
+  // This will be the FPL event ID, fetched from the API or mocked for testing.
+  const fplEventId = new BN(123456); // Replace with actual FPL event ID or mocked value
   const teamA = "Team A";
   const teamB = "Team B";
-  let event: web3.Keypair;
 
   before(async () => {
     // Airdrop SOL for player1 and player2
     await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(player1.publicKey, web3.LAMPORTS_PER_SOL)
+      await provider.connection.requestAirdrop(
+        player1.publicKey,
+        web3.LAMPORTS_PER_SOL
+      )
     );
     await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(player2.publicKey, web3.LAMPORTS_PER_SOL)
+      await provider.connection.requestAirdrop(
+        player2.publicKey,
+        web3.LAMPORTS_PER_SOL
+      )
     );
-     // Derive the vault PDA
-     [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
+    // Derive the vault PDA
+    [vaultPda, vaultBump] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("vault"), house.publicKey.toBuffer()],
       program.programId
     );
@@ -37,7 +45,6 @@ describe("sports-hub", () => {
   });
 
   it("Initializes the vault", async () => {
-    //console log vault pda
     console.log("Vault PDA:", vaultPda.toString());
     console.log("House", house.publicKey.toString());
     await program.methods
@@ -49,19 +56,23 @@ describe("sports-hub", () => {
       .rpc();
 
     const vaultBalance = await provider.connection.getBalance(vaultPda);
-    assert.strictEqual(vaultBalance, web3.LAMPORTS_PER_SOL / 2, "Vault balance should be 0.5 SOL");
+    assert.strictEqual(
+      vaultBalance,
+      web3.LAMPORTS_PER_SOL / 2,
+      "Vault balance should be 0.5 SOL"
+    );
   });
 
-  it("Creates a sports event", async () => {
+  it("Creates a sports event using FPL event ID", async () => {
     event = web3.Keypair.generate();
 
-    const durationInSeconds = 60;  // 1 minute from now
+    const durationInSeconds = 60; // 1 minute from now
 
     console.log("Setting event duration to 1 minute in the future.");
 
-    // Create the sports event (only pass the duration now)
+    // Create the sports event using the FPL event ID
     await program.methods
-      .createEvent(teamA, teamB, new BN(durationInSeconds))
+      .createEvent(fplEventId, teamA, teamB, new BN(durationInSeconds))
       .accounts({
         event: event.publicKey,
         payer: house.publicKey,
@@ -70,7 +81,10 @@ describe("sports-hub", () => {
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
-    console.log("Event start time in contract:", eventAccount.startTime.toNumber());
+    console.log(
+      "Event start time in contract:",
+      eventAccount.startTime.toNumber()
+    );
 
     assert.strictEqual(eventAccount.teamA, teamA, "Team A should be correct");
     assert.strictEqual(eventAccount.teamB, teamB, "Team B should be correct");
@@ -78,19 +92,24 @@ describe("sports-hub", () => {
 
   it("Player 1 places a bet on Team A", async () => {
     const [betPda, betBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("bet"), event.publicKey.toBuffer(), player1.publicKey.toBuffer()],
+      [
+        Buffer.from("bet"),
+        event.publicKey.toBuffer(),
+        player1.publicKey.toBuffer(),
+      ],
       program.programId
     );
-    const [playerStatsPda, playerStatsBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("stats"), player1.publicKey.toBuffer()],
-      program.programId
-    );
+    const [playerStatsPda, playerStatsBump] =
+      await web3.PublicKey.findProgramAddress(
+        [Buffer.from("stats"), player1.publicKey.toBuffer()],
+        program.programId
+      );
 
     console.log("Bet PDA:", betPda.toString());
     console.log("Player Stats PDA:", playerStatsPda.toString());
 
     await program.methods
-      .placeBet(eventId, 0, new BN(web3.LAMPORTS_PER_SOL / 10)) // Bet 0.1 SOL on Team A
+      .placeBet(fplEventId, 0, new BN(web3.LAMPORTS_PER_SOL / 10)) // Bet 0.1 SOL on Team A
       .accounts({
         player: player1.publicKey,
         vault: vaultPda,
@@ -100,24 +119,33 @@ describe("sports-hub", () => {
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
-    assert.strictEqual(eventAccount.outcomeABets.toString(), (web3.LAMPORTS_PER_SOL / 10).toString(), "Bet amount for Team A should be 0.1 SOL");
+    assert.strictEqual(
+      eventAccount.outcomeABets.toString(),
+      (web3.LAMPORTS_PER_SOL / 10).toString(),
+      "Bet amount for Team A should be 0.1 SOL"
+    );
   });
 
   it("Player 2 places a bet on Team B", async () => {
     const [betPda, betBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("bet"), event.publicKey.toBuffer(), player2.publicKey.toBuffer()],
+      [
+        Buffer.from("bet"),
+        event.publicKey.toBuffer(),
+        player2.publicKey.toBuffer(),
+      ],
       program.programId
     );
-    const [playerStatsPda, playerStatsBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("stats"), player2.publicKey.toBuffer()],
-      program.programId
-    );
+    const [playerStatsPda, playerStatsBump] =
+      await web3.PublicKey.findProgramAddress(
+        [Buffer.from("stats"), player2.publicKey.toBuffer()],
+        program.programId
+      );
 
     console.log("Bet PDA:", betPda.toString());
     console.log("Player Stats PDA:", playerStatsPda.toString());
 
     await program.methods
-      .placeBet(eventId, 1, new BN(web3.LAMPORTS_PER_SOL / 5)) // Bet 0.2 SOL on Team B
+      .placeBet(fplEventId, 1, new BN(web3.LAMPORTS_PER_SOL / 5)) // Bet 0.2 SOL on Team B
       .accounts({
         player: player2.publicKey,
         vault: vaultPda,
@@ -127,7 +155,11 @@ describe("sports-hub", () => {
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
-    assert.strictEqual(eventAccount.outcomeBBets.toString(), (web3.LAMPORTS_PER_SOL / 5).toString(), "Bet amount for Team B should be 0.2 SOL");
+    assert.strictEqual(
+      eventAccount.outcomeBBets.toString(),
+      (web3.LAMPORTS_PER_SOL / 5).toString(),
+      "Bet amount for Team B should be 0.2 SOL"
+    );
   });
 
   it("Wait for event to start", async () => {
@@ -139,22 +171,27 @@ describe("sports-hub", () => {
     let remainingTime = waitTimeInMilliseconds / 1000; // Remaining time in seconds
 
     const interval = setInterval(() => {
-        remainingTime -= 1;
-        console.log(`Time left: ${Math.floor(remainingTime / 60)} minutes ${remainingTime % 60} seconds`);
+      remainingTime -= 1;
+      console.log(
+        `Time left: ${Math.floor(remainingTime / 60)} minutes ${
+          remainingTime % 60
+        } seconds`
+      );
     }, intervalInMilliseconds);
 
-    // Wait for the set time, and then clear the interval
-    await new Promise(resolve => setTimeout(() => {
+    await new Promise((resolve) =>
+      setTimeout(() => {
         clearInterval(interval);
         resolve(true);
-    }, waitTimeInMilliseconds));
+      }, waitTimeInMilliseconds)
+    );
 
     console.log("Event should now start.");
   });
 
   it("Resolves the event with Team A winning", async () => {
     await program.methods
-      .resolveEvent(eventId, 0)  // Team A wins
+      .resolveEvent(fplEventId, 0) // Team A wins
       .accounts({
         admin: house.publicKey,
         event: event.publicKey,
@@ -163,41 +200,43 @@ describe("sports-hub", () => {
       .rpc();
 
     const eventAccount = await program.account.event.fetch(event.publicKey);
-    assert.strictEqual(eventAccount.winningOutcome, 0, "Winning outcome should be Team A (0)");
+    assert.strictEqual(
+      eventAccount.winningOutcome,
+      0,
+      "Winning outcome should be Team A (0)"
+    );
   });
 
   it("Player 1 claims reward for betting on Team A", async () => {
-    // Derive the bet PDA for player1
     const [betPda, betBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("bet"), event.publicKey.toBuffer(), player1.publicKey.toBuffer()],
+      [
+        Buffer.from("bet"),
+        event.publicKey.toBuffer(),
+        player1.publicKey.toBuffer(),
+      ],
       program.programId
     );
-  
-    // Derive the player stats PDA for player1
-    const [playerStatsPda, playerStatsBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("stats"), player1.publicKey.toBuffer()],
-      program.programId
-    );
-  
+    const [playerStatsPda, playerStatsBump] =
+      await web3.PublicKey.findProgramAddress(
+        [Buffer.from("stats"), player1.publicKey.toBuffer()],
+        program.programId
+      );
 
     console.log("Bet PDA:", betPda.toString());
     console.log("Player Stats PDA:", playerStatsPda.toString());
     console.log("Vault PDA:", vaultPda.toString());
-    //console log house 
     console.log("House PDA:", house.publicKey.toString());
-  
+
     await program.methods
-      .distributeRewards(eventId)
+      .distributeRewards(fplEventId)
       .accounts({
         player: player1.publicKey,
         event: event.publicKey,
         bet: betPda,
         playerStats: playerStatsPda,
-        house: house.publicKey,  
+        house: house.publicKey,
       })
       .signers([player1])
       .rpc();
   });
-  
-  
 });

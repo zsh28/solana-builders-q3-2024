@@ -19,14 +19,14 @@ pub mod sports_hub {
         ctx.accounts.init(amount)
     }
 
-    pub fn create_event(ctx: Context<InitializeEvent>, team_a: String, team_b: String, duration_in_seconds: i64) -> Result<()> {
+    pub fn create_event(ctx: Context<InitializeEvent>, fpl_event_id: u64, team_a: String, team_b: String, duration_in_seconds: i64) -> Result<()> {
         let event = &mut ctx.accounts.event;
         
         // Fetch current time from the Solana clock
         let current_time = Clock::get()?.unix_timestamp;
         
         // Set the event details, including the start time based on the current Solana time
-        event.event_id = 1; // Example event ID
+        event.event_id = fpl_event_id;
         event.team_a = team_a;
         event.team_b = team_b;
         event.start_time = current_time + duration_in_seconds; // Set start time to current time + duration
