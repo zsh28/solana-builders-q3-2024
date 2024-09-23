@@ -3,7 +3,7 @@ use crate::state::Event;
 
 #[derive(Accounts)]
 pub struct InitializeEvent<'info> {
-    #[account(init, payer = payer, space = 8 + Event::LEN)]
+    #[account(init, payer = payer, space = 8 + Event::LEN)] 
     pub event: Account<'info, Event>,
     #[account(mut)]
     pub payer: Signer<'info>,

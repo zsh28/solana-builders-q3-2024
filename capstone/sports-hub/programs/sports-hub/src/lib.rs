@@ -9,7 +9,7 @@ pub use state::*;
 pub use errors::*;
 pub use constants::*;
 
-declare_id!("7zqecNY5KfdS8KCyNYBrtHya8SmxXyUta3hnLEvBCZxz");
+declare_id!("58BwTBP6UGRZVYgt1tD6ijoQdrFLAybuAB1kHnT9m29N");
 
 #[program]
 pub mod sports_hub {
@@ -19,26 +19,29 @@ pub mod sports_hub {
         ctx.accounts.init(amount)
     }
 
-    pub fn create_event(ctx: Context<InitializeEvent>, fpl_event_id: u64, team_a: String, team_b: String, duration_in_seconds: i64) -> Result<()> {
+    pub fn create_event(
+        ctx: Context<InitializeEvent>, 
+        fpl_event_id: u64, 
+        team_a: String, 
+        team_b: String, 
+        kickoff_time: i64 // Accept kickoff_time directly from client
+    ) -> Result<()> {
         let event = &mut ctx.accounts.event;
-        
-        // Fetch current time from the Solana clock
-        let current_time = Clock::get()?.unix_timestamp;
-        
-        // Set the event details, including the start time based on the current Solana time
+    
+        // Set the event details, including the start time passed from the client (kickoff_time)
         event.event_id = fpl_event_id;
         event.team_a = team_a;
         event.team_b = team_b;
-        event.start_time = current_time + duration_in_seconds; // Set start time to current time + duration
+        event.start_time = kickoff_time; // Use kickoff_time from FPL API
         event.total_bets = 0;
         event.outcome_a_bets = 0;
         event.outcome_b_bets = 0;
         event.draw_bets = 0;
         event.resolved = false;
         event.winning_outcome = None;
-        
-        msg!("Event initialized with start time: {}", event.start_time);
-        
+    
+        msg!("Event initialized with start time (kickoff time): {}", event.start_time);
+    
         Ok(())
     }
 
@@ -142,4 +145,10 @@ pub mod sports_hub {
         ctx.accounts.claim_reward(event_id, ctx.bumps)
 
     }
+
+
+    pub fn delete_event(ctx: Context<DeleteEvent>) -> Result<()> {
+        ctx.accounts.delete_event()
+    }
+
 }

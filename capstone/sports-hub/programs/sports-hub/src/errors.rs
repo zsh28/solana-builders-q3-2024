@@ -28,4 +28,8 @@ pub enum CustomError {
     BetOverflow,
     #[msg("Reward already claimed")]
     RewardAlreadyClaimed,
+    #[msg("Rewards not claimed")]
+    RewardsNotClaimed,
+    #[msg("Invalid player")]
+    InvalidPlayer,
 }

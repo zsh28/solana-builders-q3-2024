@@ -3,12 +3,17 @@
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "server": "ts-node -r tsconfig-paths/register server/main.ts"
+    "server": "ts-node  server/main.ts",
+    "fetchmatches": "ts-node  server/displayEvents.ts",
+    "connection": "ts-node  server/ConnectionChecker.ts",
+    "resolveevents": "ts-node  server/resolveEvents.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",
     "@solana/web3.js": "^1.95.3",
     "axios": "^1.7.7",
+    "bn.js": "^5.2.1",
+    "borsh": "^2.0.0",
     "dotenv": "^16.4.5",
     "node-cron": "^3.0.3"
   },

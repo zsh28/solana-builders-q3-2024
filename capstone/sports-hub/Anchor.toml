@@ -4,20 +4,26 @@
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-sports_hub = "7zqecNY5KfdS8KCyNYBrtHya8SmxXyUta3hnLEvBCZxz"
+[programs.devnet]
+sports_hub = "58BwTBP6UGRZVYgt1tD6ijoQdrFLAybuAB1kHnT9m29N"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
-[test.validator]
-url = "https://api.localnet.solana.com"
 [test]
 startup_wait = 20000
+shutdown_wait = 2000
+upgradeable = false
+
+[test.validator]
+bind_address = "0.0.0.0"
+url = "https://api.devnet.solana.com"
+ledger = ".anchor/test-ledger"
+rpc_port = 8899
