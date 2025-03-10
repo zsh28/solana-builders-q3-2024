@@ -11,7 +11,7 @@ pub struct PlaceBet<'info> {
     #[account(mut)]
     pub event: Account<'info, Event>,
     #[account(
-        init,
+        init_if_needed,
         payer = player,
         space = 8 + Bet::LEN,
         seeds = [b"bet", event.key().as_ref(), player.key().as_ref()],

@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-sports_hub = "58BwTBP6UGRZVYgt1tD6ijoQdrFLAybuAB1kHnT9m29N"
+sports_hub = "DxbcyaGtfDoVJwYEu6XTRScs66EJwZ9QgaBrviycGSfV"
 
 [registry]
 url = "https://api.apr.dev"

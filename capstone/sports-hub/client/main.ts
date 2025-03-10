@@ -9,21 +9,10 @@ dotenv.config();
 
 // Run event creation at startup
 (async () => {
-  console.log("Creating FPL events on-chain at startup...");
-  await createFplEventsOnChain();
-  console.log("Event creation completed.");
-
   console.log("Fetching and displaying created events...");
   await fetchCreatedEvents();
   console.log("Events fetched and displayed.");
 
-  console.log("Resolving unresolved events...");
-  await fetchAndResolveEvents();
-  console.log("Event resolution completed.");
-
-  console.log("Deleting resolved events...");
-  await fetchAndDeleteEvents();
-  console.log("Resolved events deleted.");
 })();
 
 // Schedule task to create events every hour

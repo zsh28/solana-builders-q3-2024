@@ -6,7 +6,8 @@
     "client": "ts-node  client/main.ts",
     "fetchmatches": "ts-node  client/displayEvents.ts",
     "connection": "ts-node  client/ConnectionChecker.ts",
-    "resolveevents": "ts-node  client/resolveEvents.ts"
+    "resolveevents": "ts-node  client/resolveEvents.ts",
+    "deleteevents": "ts-node  client/deleteEvents.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",

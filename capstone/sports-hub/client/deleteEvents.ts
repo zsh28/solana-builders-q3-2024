@@ -42,7 +42,6 @@ export async function deleteBet(betPublicKey: web3.PublicKey, playerPublicKey: w
     const txSignature = await program.methods
       .deleteEvent()  // Assuming deleteEvent will also clean up associated bet accounts
       .accounts({
-        admin: house.publicKey,      // Admin or house wallet
         player: playerPublicKey,     // The player associated with the bet
       })
       .signers([])                   // The house wallet signs the transaction
@@ -65,17 +64,7 @@ export async function deleteEvent(eventPublicKey: web3.PublicKey) {
       await deleteBet(bet.publicKey, bet.account.user);
     }
 
-    // Now delete the event
-    const txSignature = await program.methods
-      .deleteEvent()
-      .accounts({
-        admin: house.publicKey,       // Admin or house wallet
-        event: eventPublicKey,        // The event to be deleted
-      })
-      .signers([])                    // The house wallet signs the transaction
-      .rpc();
-
-    console.log(`Event deleted on-chain. Transaction Signature: ${txSignature}`);
+    
   } catch (error) {
     console.error("Error deleting event:", error);
   }

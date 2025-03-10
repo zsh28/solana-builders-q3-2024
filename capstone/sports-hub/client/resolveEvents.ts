@@ -17,7 +17,6 @@ export async function resolveEvent(eventPublicKey: web3.PublicKey, eventId: BN, 
     const txSignature = await program.methods
       .resolveEvent(eventId, winningOutcome) // Pass the event ID and winning outcome
       .accounts({
-        admin: house.publicKey, // Admin (house) resolving the event
         event: eventPublicKey,   // The event account being resolved
       })
       .signers([]) // No additional signers needed as the house wallet is the signer

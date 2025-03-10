@@ -9,7 +9,7 @@ pub use state::*;
 pub use errors::*;
 pub use constants::*;
 
-declare_id!("58BwTBP6UGRZVYgt1tD6ijoQdrFLAybuAB1kHnT9m29N");
+declare_id!("DxbcyaGtfDoVJwYEu6XTRScs66EJwZ9QgaBrviycGSfV");
 
 #[program]
 pub mod sports_hub {
