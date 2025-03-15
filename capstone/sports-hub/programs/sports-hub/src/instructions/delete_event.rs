@@ -6,28 +6,26 @@ use crate::constants::OWNER;
 
 #[derive(Accounts)]
 pub struct DeleteEvent<'info> {
-    #[account(mut,
-        address = Pubkey::from_str(OWNER).unwrap()
-    )]
-    pub admin: Signer<'info>,  // Only an admin or authority should be able to delete an event.
-    
+    #[account(mut, address = Pubkey::from_str(OWNER).unwrap())]
+    pub admin: Signer<'info>,
+
     #[account(
         mut,
-        close = admin, // Close the event account and transfer rent to admin
-        constraint = event.all_rewards_claimed() @ CustomError::RewardsNotClaimed,  // Ensure all rewards are claimed
+        close = admin,
+        constraint = event.all_rewards_claimed() @ CustomError::RewardsNotClaimed
     )]
-    pub event: Account<'info, Event>,  // Event account to delete
-    
+    pub event: Account<'info, Event>,
+
     #[account(
         mut,
         seeds = [b"bet", event.key().as_ref(), player.key().as_ref()],
         bump,
-        // Removed the close attribute to handle closing manually
+        close = admin
     )]
-    pub bet: Option<Account<'info, Bet>>,
-    
+    pub bet: Option<Account<'info, Bet>>,  // Ensure mutability
+
     #[account(mut)]
-    pub player: Signer<'info>,  // The player who placed the bet
+    pub player: Signer<'info>,
 }
 
 impl<'info> DeleteEvent<'info> {
